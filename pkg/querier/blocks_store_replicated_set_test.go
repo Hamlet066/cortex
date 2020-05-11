@@ -20,7 +20,6 @@ import (
 	"github.com/cortexproject/cortex/pkg/ring/kv/consul"
 	cortex_tsdb "github.com/cortexproject/cortex/pkg/storage/tsdb"
 	"github.com/cortexproject/cortex/pkg/storegateway"
-	"github.com/cortexproject/cortex/pkg/storegateway/storegatewaypb"
 	"github.com/cortexproject/cortex/pkg/util/flagext"
 	"github.com/cortexproject/cortex/pkg/util/services"
 	"github.com/cortexproject/cortex/pkg/util/test"
@@ -193,7 +192,7 @@ func TestBlocksStoreReplicationSet_GetClientsFor(t *testing.T) {
 
 			clients, err := s.GetClientsFor(metas)
 			require.NoError(t, err)
-			assert.ElementsMatch(t, testData.expectedClients, getStoreClientClientAddrs(clients))
+			assert.ElementsMatch(t, testData.expectedClients, getStoreGatewayClientAddrs(clients))
 
 			assert.NoError(t, testutil.GatherAndCompare(reg, strings.NewReader(fmt.Sprintf(`
 				# HELP cortex_storegateway_clients The current number of store-gateway clients in the pool.
@@ -204,10 +203,10 @@ func TestBlocksStoreReplicationSet_GetClientsFor(t *testing.T) {
 	}
 }
 
-func getStoreClientClientAddrs(clients []storegatewaypb.StoreGatewayClient) []string {
+func getStoreGatewayClientAddrs(clients []BlocksStoreClient) []string {
 	var addrs []string
 	for _, c := range clients {
-		addrs = append(addrs, c.(*storeGatewayClient).conn.Target())
+		addrs = append(addrs, c.RemoteAddress())
 	}
 	return addrs
 }

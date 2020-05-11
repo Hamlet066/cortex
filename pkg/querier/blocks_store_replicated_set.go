@@ -11,7 +11,6 @@ import (
 	"github.com/cortexproject/cortex/pkg/ring"
 	"github.com/cortexproject/cortex/pkg/ring/client"
 	cortex_tsdb "github.com/cortexproject/cortex/pkg/storage/tsdb"
-	"github.com/cortexproject/cortex/pkg/storegateway/storegatewaypb"
 	"github.com/cortexproject/cortex/pkg/util/services"
 )
 
@@ -70,7 +69,7 @@ func (s *blocksStoreReplicationSet) stopping(_ error) error {
 	return services.StopManagerAndAwaitStopped(context.Background(), s.subservices)
 }
 
-func (s *blocksStoreReplicationSet) GetClientsFor(metas []*metadata.Meta) ([]storegatewaypb.StoreGatewayClient, error) {
+func (s *blocksStoreReplicationSet) GetClientsFor(metas []*metadata.Meta) ([]BlocksStoreClient, error) {
 	var sets []ring.ReplicationSet
 
 	// Find the replication set of each block we need to query.
@@ -88,7 +87,7 @@ func (s *blocksStoreReplicationSet) GetClientsFor(metas []*metadata.Meta) ([]sto
 		sets = append(sets, set)
 	}
 
-	var clients []storegatewaypb.StoreGatewayClient
+	var clients []BlocksStoreClient
 
 	// Get the client for each store-gateway.
 	for _, addr := range findSmallestInstanceSet(sets) {
@@ -97,7 +96,7 @@ func (s *blocksStoreReplicationSet) GetClientsFor(metas []*metadata.Meta) ([]sto
 			return nil, errors.Wrapf(err, "failed to get store-gateway client for %s", addr)
 		}
 
-		clients = append(clients, c.(storegatewaypb.StoreGatewayClient))
+		clients = append(clients, c.(BlocksStoreClient))
 	}
 
 	return clients, nil

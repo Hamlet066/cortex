@@ -15,7 +15,6 @@ import (
 	"github.com/thanos-io/thanos/pkg/extprom"
 
 	"github.com/cortexproject/cortex/pkg/ring/client"
-	"github.com/cortexproject/cortex/pkg/storegateway/storegatewaypb"
 	"github.com/cortexproject/cortex/pkg/util/services"
 )
 
@@ -54,7 +53,7 @@ func (s *blocksStoreBalancedSet) resolve(ctx context.Context) error {
 	return nil
 }
 
-func (s *blocksStoreBalancedSet) GetClientsFor(_ []*metadata.Meta) ([]storegatewaypb.StoreGatewayClient, error) {
+func (s *blocksStoreBalancedSet) GetClientsFor(_ []*metadata.Meta) ([]BlocksStoreClient, error) {
 	addresses := s.dnsProvider.Addresses()
 	if len(addresses) == 0 {
 		return nil, fmt.Errorf("no address resolved for the store-gateway service addresses %s", strings.Join(s.serviceAddresses, ","))
@@ -67,5 +66,5 @@ func (s *blocksStoreBalancedSet) GetClientsFor(_ []*metadata.Meta) ([]storegatew
 		return nil, errors.Wrapf(err, "failed to get store-gateway client for %s", addr)
 	}
 
-	return []storegatewaypb.StoreGatewayClient{c.(storegatewaypb.StoreGatewayClient)}, nil
+	return []BlocksStoreClient{c.(BlocksStoreClient)}, nil
 }
